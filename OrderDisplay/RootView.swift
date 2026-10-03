@@ -11,6 +11,7 @@ struct RootView: View {
 }
 
 struct OrdersView: View {
+    @EnvironmentObject var server: OrderDisplayServer
     @State private var orders: [Order] = []
     @State private var number = ""
     @State private var source: Order.Source = .pickup
@@ -18,6 +19,9 @@ struct OrdersView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    ConnectionRow()
+                }
                 Section("New order") {
                     TextField("Order number", text: $number).keyboardType(.numbersAndPunctuation)
                     Picker("Source", selection: $source) {
@@ -59,6 +63,50 @@ struct OrdersView: View {
     }
 }
 
+struct ConnectionRow: View {
+    @EnvironmentObject var settings: AppSettings
+    @EnvironmentObject var server: OrderDisplayServer
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.subheadline.bold())
+                Text(settings.serverAddress).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+            }
+            Spacer()
+            Button("Check") {
+                Task { await server.checkConnection(serverAddress: settings.serverAddress) }
+            }.buttonStyle(.borderless)
+        }
+    }
+
+    private var title: String {
+        switch server.state {
+        case .idle: return "Server not checked"
+        case .checking: return "Connecting…"
+        case .connected: return "Server connected"
+        case .disconnected: return "Server offline"
+        }
+    }
+    private var icon: String {
+        switch server.state {
+        case .connected: return "checkmark.circle.fill"
+        case .checking: return "arrow.triangle.2.circlepath"
+        case .idle: return "circle.dashed"
+        case .disconnected: return "exclamationmark.triangle.fill"
+        }
+    }
+    private var color: Color {
+        switch server.state {
+        case .connected: return .green
+        case .checking, .idle: return .secondary
+        case .disconnected: return .orange
+        }
+    }
+}
+
 struct DisplayView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var purchases: PurchaseManager
@@ -95,6 +143,7 @@ struct DisplayView: View {
 struct SettingsView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var purchases: PurchaseManager
+    @EnvironmentObject var server: OrderDisplayServer
 
     var body: some View {
         NavigationStack {
@@ -103,6 +152,10 @@ struct SettingsView: View {
                     TextField("Server address", text: $settings.serverAddress)
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
                     Text("Example: http://192.168.0.193:3000").font(.caption).foregroundStyle(.secondary)
+                    ConnectionRow()
+                    Button("Save & Test Connection") {
+                        Task { await server.checkConnection(serverAddress: settings.serverAddress) }
+                    }
                 }
                 Section("Premium") {
                     if purchases.isPremium {
@@ -112,7 +165,7 @@ struct SettingsView: View {
                         Button("Restore Purchase") { Task { await purchases.restore() } }
                     }
                 }
-                Section("Version") { Text("0.1.0") }
+                Section("Version") { Text("0.1.1") }
             }.navigationTitle("Settings")
         }
     }
