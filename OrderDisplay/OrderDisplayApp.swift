@@ -14,7 +14,7 @@ struct OrderDisplayApp: App {
                 .environmentObject(purchases)
                 .environmentObject(server)
                 .task {
-                    MobileAds.shared.start(completionHandler: nil)
+                    _ = await MobileAds.shared.start()
                     await purchases.refreshEntitlements()
                     await server.checkConnection(serverAddress: settings.serverAddress)
                 }
