@@ -4,6 +4,10 @@ options:
 settings:
   base:
     SWIFT_VERSION: 5.0
+packages:
+  GoogleMobileAds:
+    url: https://github.com/googleads/swift-package-manager-google-mobile-ads.git
+    from: 13.11.0
 targets:
   OrderDisplay:
     type: application
@@ -11,12 +15,17 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - OrderDisplay
+    dependencies:
+      - package: GoogleMobileAds
+        product: GoogleMobileAds
+      - package: GoogleMobileAds
+        product: UserMessagingPlatform
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.deoferioapps.orderdisplay
         PRODUCT_NAME: Order Display
-        MARKETING_VERSION: 0.1.0
-        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.2
+        CURRENT_PROJECT_VERSION: 2
         INFOPLIST_FILE: OrderDisplay/Info.plist
         CODE_SIGN_STYLE: Automatic
     info:
@@ -26,4 +35,4 @@ targets:
         NSLocalNetworkUsageDescription: Order Display connects to your restaurant's local Order Display server and customer display.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
-        GADApplicationIdentifier: ca-app-pub-3940256099942544~1458002511
+        GADApplicationIdentifier: ca-app-pub-2593622446351585~9721410448
