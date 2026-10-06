@@ -77,6 +77,7 @@ struct OrdersView: View {
 struct ConnectionRow: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var server: OrderDisplayServer
+    @EnvironmentObject var consent: ConsentManager
 
     var body: some View {
         HStack(spacing: 10) {
@@ -176,7 +177,19 @@ struct SettingsView: View {
                         Button("Restore Purchase") { Task { await purchases.restore() } }
                     }
                 }
-                Section("Version") { Text("0.1.3") }
+                if consent.privacyOptionsRequired {
+                    Section("Privacy") {
+                        Button("Privacy Choices") {
+                            Task { await consent.presentPrivacyOptions() }
+                        }
+                        if let error = consent.errorMessage {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                Section("Version") { Text("0.1.4") }
             }.navigationTitle("Settings")
         }
     }
