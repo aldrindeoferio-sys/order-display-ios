@@ -22,8 +22,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.deoferioapps.orderdisplay
         PRODUCT_NAME: Order Display
-        MARKETING_VERSION: 0.1.4
-        CURRENT_PROJECT_VERSION: 4
+        MARKETING_VERSION: 0.1.5
+        CURRENT_PROJECT_VERSION: 5
         INFOPLIST_FILE: OrderDisplay/Info.plist
         CODE_SIGN_STYLE: Automatic
     info:
