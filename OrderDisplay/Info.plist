@@ -5,6 +5,6 @@
     <key>CFBundleDisplayName</key><string>Order Display</string>
     <key>NSLocalNetworkUsageDescription</key><string>Order Display connects to your restaurant's local Order Display server and customer display.</string>
     <key>NSAppTransportSecurity</key><dict><key>NSAllowsLocalNetworking</key><true/></dict>
-    <key>GADApplicationIdentifier</key><string>ca-app-pub-3940256099942544~1458002511</string>
+    <key>GADApplicationIdentifier</key><string>ca-app-pub-2593622446351585~9721410448</string>
 </dict>
 </plist>
