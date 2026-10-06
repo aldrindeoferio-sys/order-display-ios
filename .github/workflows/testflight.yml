@@ -42,18 +42,52 @@ jobs:
           KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
           KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
 
-          echo "$IOS_DISTRIBUTION_CERTIFICATE" | base64 -D > "$CERT_PATH"
-          echo "$IOS_PROVISIONING_PROFILE" | base64 -D > "$PROFILE_PATH"
+          # Decode with Python for consistent behavior on GitHub macOS runners.
+          python3 - <<'PY'
+          import base64, os, pathlib, sys
+          items = [
+              ("IOS_DISTRIBUTION_CERTIFICATE", pathlib.Path(os.environ["RUNNER_TEMP"]) / "distribution.p12"),
+              ("IOS_PROVISIONING_PROFILE", pathlib.Path(os.environ["RUNNER_TEMP"]) / "profile.mobileprovision"),
+          ]
+          for name, path in items:
+              try:
+                  path.write_bytes(base64.b64decode(os.environ[name], validate=True))
+              except Exception as exc:
+                  print(f"::error::{name} is not valid Base64: {exc}")
+                  sys.exit(1)
+              if path.stat().st_size == 0:
+                  print(f"::error::{name} decoded to an empty file")
+                  sys.exit(1)
+              print(f"{name} decoded successfully ({path.stat().st_size} bytes).")
+          PY
+
+          # Validate the P12 and its password without printing either secret.
+          if ! openssl pkcs12 -in "$CERT_PATH" -passin env:IOS_DISTRIBUTION_PASSWORD -noout >/dev/null 2>&1; then
+            echo "::error::The distribution .p12 could not be opened. IOS_DISTRIBUTION_PASSWORD may not match MYIEM_Distribution.p12, or the P12 is invalid."
+            exit 1
+          fi
+          echo "Distribution P12 and password validated."
+
+          # Validate the Apple provisioning profile before installing it.
+          if ! security cms -D -i "$PROFILE_PATH" >/dev/null 2>&1; then
+            echo "::error::IOS_PROVISIONING_PROFILE is not a valid Apple mobileprovision file."
+            exit 1
+          fi
+          echo "Provisioning profile validated."
 
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$CERT_PATH" -P "$IOS_DISTRIBUTION_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          if ! security import "$CERT_PATH" -P "$IOS_DISTRIBUTION_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"; then
+            echo "::error::Apple Distribution certificate import failed."
+            exit 1
+          fi
           security list-keychain -d user -s "$KEYCHAIN_PATH"
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           cp "$PROFILE_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/"
+          echo "Signing certificate and provisioning profile installed."
 
       - name: Archive
         run: |
