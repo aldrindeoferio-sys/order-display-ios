@@ -29,9 +29,10 @@ struct AdMobBannerView: UIViewRepresentable {
 
 struct FreeAdBanner: View {
     @EnvironmentObject var purchases: PurchaseManager
+    @EnvironmentObject var consent: ConsentManager
 
     var body: some View {
-        if !purchases.isPremium {
+        if !purchases.isPremium && consent.canRequestAds {
             AdMobBannerView()
                 .frame(height: 50)
                 .frame(maxWidth: .infinity)
