@@ -3,22 +3,27 @@ import GoogleMobileAds
 
 struct AdMobBannerView: UIViewRepresentable {
     func makeUIView(context: Context) -> BannerView {
-        let view = BannerView()
-        view.adSize = AdSizeBanner
+        let view = BannerView(adSize: AdSizeBanner)
         view.adUnitID = AdConfiguration.bannerUnitID
-        view.rootViewController = context.coordinator.rootViewController
+        view.rootViewController = topViewController()
         view.load(Request())
         return view
     }
 
-    func updateUIView(_ uiView: BannerView, context: Context) {}
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
+    func updateUIView(_ uiView: BannerView, context: Context) {
+        if uiView.rootViewController == nil {
+            uiView.rootViewController = topViewController()
+        }
     }
 
-    final class Coordinator {
-        let rootViewController = UIViewController()
+    private func topViewController() -> UIViewController? {
+        guard let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }),
+              let root = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
+            return nil
+        }
+        return root
     }
 }
 
