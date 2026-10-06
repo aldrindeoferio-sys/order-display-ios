@@ -61,12 +61,11 @@ jobs:
               print(f"{name} decoded successfully ({path.stat().st_size} bytes).")
           PY
 
-          # Validate the P12 and its password without printing either secret.
-          if ! openssl pkcs12 -in "$CERT_PATH" -passin env:IOS_DISTRIBUTION_PASSWORD -noout >/dev/null 2>&1; then
-            echo "::error::The distribution .p12 could not be opened. IOS_DISTRIBUTION_PASSWORD may not match MYIEM_Distribution.p12, or the P12 is invalid."
-            exit 1
-          fi
-          echo "Distribution P12 and password validated."
+          # Do not pre-validate the P12 with OpenSSL. Older Apple-exported
+          # PKCS#12 files can use legacy algorithms that OpenSSL 3 rejects even
+          # when the password and certificate are valid. macOS Security is the
+          # authoritative importer used below.
+          echo "Distribution P12 decoded; validating by importing into the macOS keychain."
 
           # Validate the Apple provisioning profile before installing it.
           if ! security cms -D -i "$PROFILE_PATH" >/dev/null 2>&1; then
