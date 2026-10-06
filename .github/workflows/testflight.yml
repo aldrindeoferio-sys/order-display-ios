@@ -1,0 +1,69 @@
+name: TestFlight Archive
+
+on:
+  workflow_dispatch:
+
+jobs:
+  archive:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project OrderDisplay.xcodeproj -scheme OrderDisplay
+
+      - name: Verify TestFlight secrets
+        env:
+          IOS_DISTRIBUTION_CERTIFICATE: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
+          IOS_DISTRIBUTION_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_PASSWORD }}
+          IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+        run: |
+          test -n "$IOS_DISTRIBUTION_CERTIFICATE" || { echo "::error::Missing IOS_DISTRIBUTION_CERTIFICATE"; exit 1; }
+          test -n "$IOS_DISTRIBUTION_PASSWORD" || { echo "::error::Missing IOS_DISTRIBUTION_PASSWORD"; exit 1; }
+          test -n "$IOS_PROVISIONING_PROFILE" || { echo "::error::Missing IOS_PROVISIONING_PROFILE"; exit 1; }
+          echo "Signing secrets are configured."
+
+      - name: Install signing certificate and profile
+        env:
+          IOS_DISTRIBUTION_CERTIFICATE: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
+          IOS_DISTRIBUTION_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_PASSWORD }}
+          IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+        run: |
+          CERT_PATH="$RUNNER_TEMP/distribution.p12"
+          PROFILE_PATH="$RUNNER_TEMP/profile.mobileprovision"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
+
+          echo "$IOS_DISTRIBUTION_CERTIFICATE" | base64 --decode > "$CERT_PATH"
+          echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > "$PROFILE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$IOS_DISTRIBUTION_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PROFILE_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/"
+
+      - name: Archive
+        run: |
+          set -o pipefail
+          xcodebuild             -project OrderDisplay.xcodeproj             -scheme OrderDisplay             -configuration Release             -destination 'generic/platform=iOS'             -archivePath "$RUNNER_TEMP/OrderDisplay.xcarchive"             archive 2>&1 | tee archive.log
+
+      - name: Upload archive log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testflight-archive-log
+          path: archive.log
+          retention-days: 7
