@@ -7,10 +7,6 @@ struct OrderDisplayApp: App {
     @StateObject private var purchases = PurchaseManager()
     @StateObject private var server = OrderDisplayServer()
 
-    init() {
-        MobileAds.shared.start()
-    }
-
     var body: some Scene {
         WindowGroup {
             RootView()
@@ -18,6 +14,7 @@ struct OrderDisplayApp: App {
                 .environmentObject(purchases)
                 .environmentObject(server)
                 .task {
+                    MobileAds.shared.start(completionHandler: nil)
                     await purchases.refreshEntitlements()
                     await server.checkConnection(serverAddress: settings.serverAddress)
                 }
