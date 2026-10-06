@@ -40,7 +40,7 @@ jobs:
         if: failure()
         run: |
           echo "=== XCODE COMPILER ERRORS ==="
-          ERRORS=$(grep -E "error:|fatal error:" build.log | tail -100 || true)\n          echo "$ERRORS"\n          {\n            echo "## Xcode compiler errors"\n            echo '```'\n            echo "$ERRORS"\n            echo '```'\n          } >> "$GITHUB_STEP_SUMMARY"
+          ERRORS=$(grep -E "error:|fatal error:" build.log | tail -100 || true)\n          printf "%s\\n" "$ERRORS" > compiler-errors.txt\n          echo "$ERRORS"\n          {\n            echo "## Xcode compiler errors"\n            echo '```'\n            echo "$ERRORS"\n            echo '```'\n          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload build log
         if: failure()
