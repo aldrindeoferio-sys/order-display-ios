@@ -36,7 +36,18 @@ struct OrdersView: View {
                 }
                 Section("Current Orders") {
                     if orders.filter({ $0.status != .collected }).isEmpty {
-                        ContentUnavailableView("No current orders", systemImage: "checkmark.circle")
+                        VStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle")
+                                .font(.title2)
+                                .foregroundStyle(.secondary)
+                            Text("No current orders")
+                                .font(.headline)
+                            Text("New orders will appear here.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
                     }
                     ForEach($orders) { $order in
                         VStack(alignment: .leading, spacing: 8) {
