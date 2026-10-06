@@ -178,7 +178,7 @@ struct PremiumCard: View {
             Text("Order Display Premium").font(.headline)
             Text("No ads • All seasonal backgrounds • One-time purchase")
                 .font(.subheadline).foregroundStyle(.secondary)
-            Button(purchases.product?.displayPrice.map { "Unlock Premium — \($0)" } ?? "Unlock Premium") {
+            Button(purchases.product.map { "Unlock Premium — \($0.displayPrice)" } ?? "Unlock Premium") {
                 Task { await purchases.purchasePremium() }
             }.buttonStyle(.borderedProminent)
         }.padding(.vertical, 4)
