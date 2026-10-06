@@ -115,10 +115,64 @@ jobs:
             CODE_SIGN_IDENTITY="Apple Distribution" \
             archive 2>&1 | tee archive.log
 
-      - name: Upload archive log on failure
+      - name: Export TestFlight Internal Only IPA
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>export</string>
+            <key>teamID</key>
+            <string>$TEAM_ID</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>signingCertificate</key>
+            <string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.deoferioapps.orderdisplay</key>
+              <string>$PROFILE_NAME</string>
+            </dict>
+            <key>manageAppVersionAndBuildNumber</key>
+            <false/>
+            <key>testFlightInternalTestingOnly</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+          plutil -lint "$RUNNER_TEMP/ExportOptions.plist"
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$RUNNER_TEMP/OrderDisplay.xcarchive" \
+            -exportPath "$RUNNER_TEMP/TestFlightExport" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            2>&1 | tee export.log
+
+          test -f "$RUNNER_TEMP/TestFlightExport/Order Display.ipa" || {
+            echo "::error::Order Display.ipa was not produced."
+            find "$RUNNER_TEMP/TestFlightExport" -maxdepth 2 -type f -print || true
+            exit 1
+          }
+
+      - name: Save TestFlight IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: order-display-v0.1.5-testflight-internal
+          path: ${{ runner.temp }}/TestFlightExport/Order Display.ipa
+          retention-days: 7
+
+      - name: Upload archive/export logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: testflight-archive-log
-          path: archive.log
+          path: |
+            archive.log
+            export.log
+          if-no-files-found: ignore
           retention-days: 7
