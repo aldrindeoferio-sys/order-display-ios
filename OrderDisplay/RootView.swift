@@ -156,6 +156,7 @@ struct SettingsView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var purchases: PurchaseManager
     @EnvironmentObject var server: OrderDisplayServer
+    @EnvironmentObject var consent: ConsentManager
 
     var body: some View {
         NavigationStack {
