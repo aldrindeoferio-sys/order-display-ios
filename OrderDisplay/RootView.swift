@@ -190,7 +190,7 @@ struct SettingsView: View {
                         }
                     }
                 }
-                Section("Version") { Text("0.1.4") }
+                Section("Version") { Text("0.1.5") }
             }.navigationTitle("Settings")
         }
     }
