@@ -165,7 +165,7 @@ struct SettingsView: View {
                         Button("Restore Purchase") { Task { await purchases.restore() } }
                     }
                 }
-                Section("Version") { Text("0.1.1") }
+                Section("Version") { Text("0.1.2") }
             }.navigationTitle("Settings")
         }
     }
