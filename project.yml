@@ -26,11 +26,13 @@ targets:
         CURRENT_PROJECT_VERSION: 5
         INFOPLIST_FILE: OrderDisplay/Info.plist
         TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
     info:
       path: OrderDisplay/Info.plist
       properties:
         CFBundleDisplayName: Order Display
+        CFBundleIconName: AppIcon
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         ITSAppUsesNonExemptEncryption: false
