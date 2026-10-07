@@ -108,16 +108,17 @@ jobs:
       - name: Archive
         run: |
           set -o pipefail
+          # Signing is configured only on the OrderDisplay application target
+          # in project.yml. Do not pass provisioning settings on the xcodebuild
+          # command line: command-line build settings propagate into Swift
+          # package resource targets such as GTMSessionFetcher, which do not
+          # support provisioning profiles.
           xcodebuild \
             -project OrderDisplay.xcodeproj \
             -scheme OrderDisplay \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/OrderDisplay.xcarchive" \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM="$TEAM_ID" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
             archive 2>&1 | tee archive.log
 
       - name: Export TestFlight Internal Only IPA
@@ -167,7 +168,7 @@ jobs:
       - name: Save TestFlight IPA
         uses: actions/upload-artifact@v4
         with:
-          name: order-display-v0.1.6-testflight-internal
+          name: order-display-v0.1.6-build7-testflight-internal
           path: ${{ runner.temp }}/TestFlightExport/Order Display.ipa
           retention-days: 7
 
