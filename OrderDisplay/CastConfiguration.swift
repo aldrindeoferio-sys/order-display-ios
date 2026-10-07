@@ -27,6 +27,12 @@ final class CastAppDelegate: NSObject, UIApplicationDelegate {
 
         let criteria = GCKDiscoveryCriteria(applicationID: receiverID)
         let options = GCKCastOptions(discoveryCriteria: criteria)
+
+        // Start discovery as soon as the app is active so the native Cast picker
+        // is already populated when the user taps it.
+        options.disableDiscoveryAutostart = false
+        options.startDiscoveryAfterFirstTapOnCastButton = false
+
         GCKCastContext.setSharedInstanceWith(options)
         return true
     }
