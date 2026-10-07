@@ -25,7 +25,7 @@ struct RootView: View {
                 }
             }
 
-            TVControlsOverlay()
+            TVControlsOverlay(controllerBridge: controllerBridge)
         }
     }
 }
