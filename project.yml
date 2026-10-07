@@ -25,11 +25,16 @@ targets:
         MARKETING_VERSION: 0.1.5
         CURRENT_PROJECT_VERSION: 5
         INFOPLIST_FILE: OrderDisplay/Info.plist
+        TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
     info:
       path: OrderDisplay/Info.plist
       properties:
         CFBundleDisplayName: Order Display
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
         NSLocalNetworkUsageDescription: Order Display connects to your restaurant's local Order Display server and customer display.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
