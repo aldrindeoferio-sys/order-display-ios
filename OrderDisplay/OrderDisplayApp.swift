@@ -3,6 +3,7 @@ import GoogleMobileAds
 
 @main
 struct OrderDisplayApp: App {
+    @UIApplicationDelegateAdaptor(CastAppDelegate.self) private var castAppDelegate
     @StateObject private var settings = AppSettings()
     @StateObject private var purchases = PurchaseManager()
     @StateObject private var server = OrderDisplayServer()
