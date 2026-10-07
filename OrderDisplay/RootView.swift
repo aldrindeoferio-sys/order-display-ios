@@ -8,18 +8,22 @@ struct RootView: View {
     @State private var loadFailed = false
 
     var body: some View {
-        Group {
-            if let url = settings.controllerURL, !loadFailed {
-                ControllerWebView(
-                    url: url,
-                    loadFailed: $loadFailed,
-                    purchases: purchases,
-                    consent: consent
-                )
-                .ignoresSafeArea()
-            } else {
-                ServerSetupView(loadFailed: $loadFailed)
+        ZStack(alignment: .topTrailing) {
+            Group {
+                if let url = settings.controllerURL, !loadFailed {
+                    ControllerWebView(
+                        url: url,
+                        loadFailed: $loadFailed,
+                        purchases: purchases,
+                        consent: consent
+                    )
+                    .ignoresSafeArea()
+                } else {
+                    ServerSetupView(loadFailed: $loadFailed)
+                }
             }
+
+            TVControlsOverlay()
         }
     }
 }
