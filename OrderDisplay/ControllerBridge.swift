@@ -27,4 +27,12 @@ final class ControllerBridge: ObservableObject {
         """
         webView?.evaluateJavaScript(script)
     }
+
+    func currentRoomID(completion: @escaping (String?) -> Void) {
+        let script = "localStorage.getItem('hapag-room-id') || ''"
+        webView?.evaluateJavaScript(script) { value, _ in
+            let room = (value as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+            completion((room?.isEmpty == false) ? room : nil)
+        }
+    }
 }
