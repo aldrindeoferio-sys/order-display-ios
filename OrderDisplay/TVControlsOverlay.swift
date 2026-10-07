@@ -6,9 +6,9 @@ struct TVControlsOverlay: View {
             GoogleCastButton()
                 .frame(width: 40, height: 40)
                 .accessibilityLabel("Connect to TV")
-                // Keep the native Cast control clear of the web app's top-right menu.
-                .padding(.top, 68)
-                .padding(.trailing, 12)
+                // Place Cast directly beside the web app's top-right menu button.
+                .padding(.top, 8)
+                .padding(.trailing, 58)
         }
     }
 }
