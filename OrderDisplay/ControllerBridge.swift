@@ -16,7 +16,7 @@ final class ControllerBridge: ObservableObject {
           if (!style) {
             style = document.createElement('style');
             style.id = 'order-display-native-main-style';
-            style.textContent = '#pairPanel{display:none!important}#controller{display:block!important}';
+            style.textContent = '#pairPanel{display:none!important}#controller{display:block!important}.info-label,.helper-text,.hint-text,.status-label[data-info-only="true"]{display:none!important}';
             document.head.appendChild(style);
           }
           const pair = document.getElementById('pairPanel');
