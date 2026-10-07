@@ -6,9 +6,10 @@ struct ControllerWebView: UIViewRepresentable {
     @Binding var loadFailed: Bool
     @ObservedObject var purchases: PurchaseManager
     @ObservedObject var consent: ConsentManager
+    @ObservedObject var controllerBridge: ControllerBridge
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(loadFailed: $loadFailed, purchases: purchases, consent: consent)
+        Coordinator(loadFailed: $loadFailed, purchases: purchases, consent: consent, controllerBridge: controllerBridge)
     }
 
     func makeUIView(context: Context) -> WKWebView {
@@ -32,6 +33,7 @@ struct ControllerWebView: UIViewRepresentable {
         webView.backgroundColor = UIColor(red: 8/255, green: 19/255, blue: 29/255, alpha: 1)
 
         context.coordinator.webView = webView
+        controllerBridge.attach(webView)
         context.coordinator.loadedURL = url
         webView.load(URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData))
         return webView
@@ -65,18 +67,22 @@ struct ControllerWebView: UIViewRepresentable {
         @Binding private var loadFailed: Bool
         let purchases: PurchaseManager
         let consent: ConsentManager
+        let controllerBridge: ControllerBridge
         weak var webView: WKWebView?
         var loadedURL: URL?
 
-        init(loadFailed: Binding<Bool>, purchases: PurchaseManager, consent: ConsentManager) {
+        init(loadFailed: Binding<Bool>, purchases: PurchaseManager, consent: ConsentManager, controllerBridge: ControllerBridge) {
             _loadFailed = loadFailed
             self.purchases = purchases
             self.consent = consent
+            self.controllerBridge = controllerBridge
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             loadFailed = false
             pushMonetizationState()
+            controllerBridge.attach(webView)
+            controllerBridge.showMainOrderControl()
         }
 
         func webView(
