@@ -28,11 +28,14 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.deoferioapps.orderdisplay
         PRODUCT_NAME: Order Display
         MARKETING_VERSION: 0.1.6
-        CURRENT_PROJECT_VERSION: 6
+        CURRENT_PROJECT_VERSION: 7
         INFOPLIST_FILE: OrderDisplay/Info.plist
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_STYLE: Manual
+        DEVELOPMENT_TEAM: LG9KF54FLF
+        PROVISIONING_PROFILE_SPECIFIER: Order Display App Store
+        CODE_SIGN_IDENTITY: Apple Distribution
     info:
       path: OrderDisplay/Info.plist
       properties:
