@@ -87,7 +87,7 @@ private struct TVConnectionSheet: View {
                     .padding(.horizontal, 14)
                     .frame(height: 50)
                     .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 14))
-                    .onChange(of: pairCode) { _, newValue in
+                    .onChange(of: pairCode) { newValue in
                         pairCode = String(newValue.filter(\.isNumber).prefix(4))
                     }
 
