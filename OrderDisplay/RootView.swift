@@ -6,6 +6,7 @@ struct RootView: View {
     @EnvironmentObject private var consent: ConsentManager
 
     @State private var loadFailed = false
+    @StateObject private var controllerBridge = ControllerBridge()
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -15,7 +16,8 @@ struct RootView: View {
                         url: url,
                         loadFailed: $loadFailed,
                         purchases: purchases,
-                        consent: consent
+                        consent: consent,
+                        controllerBridge: controllerBridge
                     )
                     .ignoresSafeArea()
                 } else {
@@ -23,7 +25,7 @@ struct RootView: View {
                 }
             }
 
-            TVControlsOverlay()
+            TVControlsOverlay(controllerBridge: controllerBridge)
         }
     }
 }
