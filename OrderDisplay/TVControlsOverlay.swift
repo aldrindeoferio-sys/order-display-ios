@@ -5,14 +5,13 @@ struct TVControlsOverlay: View {
 
     var body: some View {
         if CastConfiguration.isConfigured {
+            // Keep the Google Cast session listener alive for room handoff.
+            // The visible Cast button is in the web Display Settings header.
             GoogleCastButton(controllerBridge: controllerBridge)
-                .frame(width: 48, height: 48)
-                .accessibilityLabel("Connect to TV")
-                // Align with the hamburger button in the web header.
-                .padding(.top, 8)
-                .padding(.trailing, 92)
-                .allowsHitTesting(true)
-                .zIndex(10000)
+                .frame(width: 1, height: 1)
+                .opacity(0)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
         }
     }
 }
