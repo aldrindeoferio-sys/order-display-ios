@@ -1,5 +1,6 @@
 import SwiftUI
 import WebKit
+import GoogleCast
 
 struct ControllerWebView: UIViewRepresentable {
     let url: URL
@@ -61,7 +62,8 @@ struct ControllerWebView: UIViewRepresentable {
             "purchaseRemoveAds",
             "restorePurchases",
             "showPrivacyOptions",
-            "showInterstitial"
+            "showInterstitial",
+            "openGoogleCast"
         ]
 
         @Binding private var loadFailed: Bool
@@ -136,6 +138,11 @@ struct ControllerWebView: UIViewRepresentable {
                 Task { @MainActor in
                     await consent.presentPrivacyOptions()
                     pushMonetizationState()
+                }
+
+            case "openGoogleCast":
+                if CastConfiguration.isConfigured {
+                    GCKCastContext.sharedInstance().presentCastDialog()
                 }
 
             case "showInterstitial":
