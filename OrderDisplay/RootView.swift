@@ -6,6 +6,7 @@ struct RootView: View {
     @EnvironmentObject private var consent: ConsentManager
 
     @State private var loadFailed = false
+    @State private var showingIntegrations = false
     @StateObject private var controllerBridge = ControllerBridge()
 
     var body: some View {
@@ -26,6 +27,25 @@ struct RootView: View {
             }
 
             TVControlsOverlay(controllerBridge: controllerBridge)
+            VStack {
+                HStack {
+                    Button {
+                        showingIntegrations = true
+                    } label: {
+                        Label("Integrations", systemImage: "link")
+                            .font(.subheadline.weight(.semibold))
+                            .padding(10)
+                            .background(.regularMaterial, in: Capsule())
+                    }
+                    .padding(.leading, 12)
+                    Spacer()
+                }
+                Spacer()
+            }
+            .padding(.top, 56)
+            .sheet(isPresented: $showingIntegrations) {
+                IntegrationHubView()
+            }
         }
     }
 }
