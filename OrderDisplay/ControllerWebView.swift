@@ -1,6 +1,7 @@
 import SwiftUI
 import WebKit
 import GoogleCast
+import GoogleMobileAds
 
 struct ControllerWebView: UIViewRepresentable {
     let url: URL
@@ -72,6 +73,7 @@ struct ControllerWebView: UIViewRepresentable {
         let controllerBridge: ControllerBridge
         weak var webView: WKWebView?
         var loadedURL: URL?
+        private let interstitial = TestInterstitialManager()
 
         init(loadFailed: Binding<Bool>, purchases: PurchaseManager, consent: ConsentManager, controllerBridge: ControllerBridge) {
             _loadFailed = loadFailed
@@ -83,6 +85,7 @@ struct ControllerWebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             loadFailed = false
             pushMonetizationState()
+            interstitial.preloadIfAllowed(consent.canRequestAds && !purchases.isPremium)
             controllerBridge.attach(webView)
             controllerBridge.showMainOrderControl()
         }
@@ -146,9 +149,10 @@ struct ControllerWebView: UIViewRepresentable {
                 }
 
             case "showInterstitial":
-                // TestFlight build 0.1.6 deliberately does not serve live ads.
-                // Keep the web controller flow moving after the natural break.
-                webView?.evaluateJavaScript("window.DeoferioMonetization?.adClosed?.();")
+                // Only the web controller's existing natural-break request can trigger an ad.
+                interstitial.showIfEligible(allowed: consent.canRequestAds && !purchases.isPremium) { [weak self] in
+                    self?.webView?.evaluateJavaScript("window.DeoferioMonetization?.adClosed?.();")
+                }
 
             default:
                 break
@@ -160,7 +164,7 @@ struct ControllerWebView: UIViewRepresentable {
             let state: [String: Any] = [
                 "isNativeIOS": true,
                 "adFree": purchases.isPremium,
-                "canRequestAds": false,
+                "canRequestAds": consent.canRequestAds && !purchases.isPremium,
                 "removeAdsPrice": purchases.product?.displayPrice ?? "",
                 "privacyOptionsRequired": consent.privacyOptionsRequired
             ]
