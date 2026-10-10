@@ -121,7 +121,7 @@ jobs:
             -archivePath "$RUNNER_TEMP/OrderDisplay.xcarchive" \
             archive 2>&1 | tee archive.log
 
-      - name: Export TestFlight Internal Only IPA
+      - name: Export App Store Eligible IPA
         run: |
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -145,8 +145,6 @@ jobs:
             </dict>
             <key>manageAppVersionAndBuildNumber</key>
             <false/>
-            <key>testFlightInternalTestingOnly</key>
-            <true/>
           </dict>
           </plist>
           EOF
@@ -168,7 +166,7 @@ jobs:
       - name: Save TestFlight IPA
         uses: actions/upload-artifact@v4
         with:
-          name: order-display-v0.1.6-build7-testflight-internal
+          name: order-display-appstore-eligible
           path: ${{ runner.temp }}/TestFlightExport/Order Display.ipa
           retention-days: 7
 
