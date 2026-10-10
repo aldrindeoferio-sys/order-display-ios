@@ -27,6 +27,13 @@ struct RootView: View {
 
             TVControlsOverlay(controllerBridge: controllerBridge)
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !purchases.isPremium && consent.canRequestAds {
+                FreeAdBanner()
+                    .background(.regularMaterial)
+                    .accessibilityLabel("Test advertisement")
+            }
+        }
     }
 }
 
