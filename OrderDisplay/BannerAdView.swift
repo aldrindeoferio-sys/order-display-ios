@@ -4,7 +4,8 @@ import GoogleMobileAds
 struct AdMobBannerView: UIViewRepresentable {
     func makeUIView(context: Context) -> BannerView {
         let view = BannerView(adSize: AdSizeBanner)
-        view.adUnitID = AdConfiguration.bannerUnitID
+        // TestFlight: use Google's official test unit, never a live ad unit.
+        view.adUnitID = AdConfiguration.testBannerUnitID
         view.rootViewController = topViewController()
         view.load(Request())
         return view
