@@ -20,6 +20,28 @@ struct ControllerWebView: UIViewRepresentable {
             content.add(context.coordinator, name: name)
         }
 
+        // App Review 3.1.1: the embedded web controller must not offer
+        // external promotional-code redemption in the native iOS app.
+        // StoreKit remains the only source of iOS Remove Ads entitlement.
+        let iosRedemptionPolicy = WKUserScript(
+            source: """
+            (() => {
+              const css = '#webRedemptionGroup{display:none!important}';
+              const style = document.createElement('style');
+              style.textContent = css;
+              (document.head || document.documentElement).appendChild(style);
+              const removeRedemption = () => {
+                document.getElementById('webRedemptionGroup')?.remove();
+              };
+              document.addEventListener('DOMContentLoaded', removeRedemption, { once: true });
+              new MutationObserver(removeRedemption).observe(document.documentElement, { childList: true, subtree: true });
+            })();
+            """,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        )
+        content.addUserScript(iosRedemptionPolicy)
+
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = content
         configuration.defaultWebpagePreferences.allowsContentJavaScript = true
